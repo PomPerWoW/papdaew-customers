@@ -12,7 +12,7 @@ class UserRoutes {
   }
 
   setup() {
-    this.#router.get('/users/:id', this.#userController.getUser);
+    this.#router.route('/:id').get(this.#userController.getUser);
     return this.#router;
   }
 }

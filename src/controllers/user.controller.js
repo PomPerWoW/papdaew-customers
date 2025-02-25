@@ -8,8 +8,8 @@ class UserController {
   #userService;
 
   constructor() {
-    this.#logger = new PinoLogger().child({ service: 'User Controller' });
     this.#userService = new UserService();
+    this.#logger = new PinoLogger().child({ service: 'User Controller' });
   }
 
   getUser = asyncHandler(async (req, res) => {
@@ -22,7 +22,11 @@ class UserController {
       throw new NotFoundError('User not found');
     }
 
-    res.status(StatusCodes.OK).json(user);
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'User fetched successfully',
+      data: user,
+    });
   });
 }
 
