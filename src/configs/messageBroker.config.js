@@ -1,15 +1,15 @@
 const amqp = require('amqplib');
 const { PinoLogger } = require('@papdaew/shared');
 
-const UserService = require('#users/services/user.service.js');
-const Config = require('#users/configs/config.js');
+const CustomerService = require('#customers/services/customer.service.js');
+const Config = require('#customers/configs/config.js');
 
 class MessageBroker {
   #logger;
   #config;
   #connection;
   #channel;
-  #userService;
+  #customerService;
   static #instance;
 
   constructor() {
@@ -17,7 +17,7 @@ class MessageBroker {
       return MessageBroker.#instance;
     }
     this.#config = new Config();
-    this.#userService = new UserService();
+    this.#customerService = new CustomerService();
     this.#logger = new PinoLogger().child({
       service: 'Message Broker',
     });
@@ -94,12 +94,12 @@ class MessageBroker {
           const content = JSON.parse(message.content.toString());
 
           if (content.type === 'USER_CREATED') {
-            const userData = content.data;
+            const customerData = content.data;
 
-            await this.#userService.createUser(userData);
+            await this.#customerService.createCustomer(customerData);
 
             this.#logger.info(
-              `Successfully created user with ID: ${userData.id}`
+              `Successfully created customer with ID: ${customerData.id}`
             );
           }
 
