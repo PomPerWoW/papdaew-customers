@@ -23,7 +23,7 @@ module.exports = [
     settings: {
       'import/resolver': {
         alias: {
-          map: [['#auth', './src']],
+          map: [['#users', './src']],
           extensions: ['.js', '.json'],
         },
         node: {
@@ -47,7 +47,7 @@ module.exports = [
           ],
           pathGroups: [
             {
-              pattern: '#auth/**',
+              pattern: '#users/**',
               group: 'internal',
               position: 'after',
             },
