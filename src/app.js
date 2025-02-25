@@ -1,26 +1,26 @@
 const { PinoLogger } = require('@papdaew/shared');
 
-const UserServer = require('#users/server.js');
-const MessageBroker = require('#users/configs/messageBroker.config.js');
-const Database = require('#users/configs/database.config.js');
-const Config = require('#users/configs/config.js');
+const CustomerServer = require('#customers/server.js');
+const MessageBroker = require('#customers/configs/messageBroker.config.js');
+const Database = require('#customers/configs/database.config.js');
+const Config = require('#customers/configs/config.js');
 
 class Application {
   constructor() {
     this.config = new Config();
     this.appLogger = new PinoLogger({
-      name: 'User Application',
+      name: 'Customer Application',
       level: this.config.LOG_LEVEL,
       serviceVersion: this.config.SERVICE_VERSION,
       environment: this.config.NODE_ENV,
     });
-    this.server = new UserServer();
+    this.server = new CustomerServer();
     this.database = new Database();
     this.messageBroker = new MessageBroker();
   }
 
   initialize = () => {
-    this.appLogger.info('Initializing User Application');
+    this.appLogger.info('Initializing Customer Application');
     this.setupUncaughtException();
     this.database.connect();
     this.messageBroker.connect();

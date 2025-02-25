@@ -1,12 +1,12 @@
-# Users Service
+# Customers Service
 
 ## Overview
 
-Users service for Papdaew. This service handles user profile management, user preferences, and user-specific operations. It works in conjunction with the auth service through message queues.
+Customers service for Papdaew. This service handles customer-specific operations, including profile management, queue history, and customer preferences. It works in conjunction with the auth service through message queues.
 
 ## Table of Contents
 
-- [Users Service](#users-service)
+- [Customers Service](#customers-service)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
@@ -18,13 +18,15 @@ Users service for Papdaew. This service handles user profile management, user pr
 
 ## Features
 
-- User profile management (CRUD operations)
-- Profile data storage and retrieval
-- Event-driven updates from auth service
-- Role-based profile fields
+- Customer profile management (CRUD operations)
+- Queue history tracking (planned)
+- Active queues monitoring (planned)
+- Customer preferences management (planned)
 - Profile picture handling (planned)
 - Address management (planned)
-- User preferences (planned)
+- Notification preferences (planned)
+- Queue position tracking (planned)
+- Customer analytics
 
 ## Tech Stack
 
@@ -32,19 +34,31 @@ Users service for Papdaew. This service handles user profile management, user pr
 
 ## Project Structure
 
-```
-services/papdaew-users/
+```services/papdaew-customers/README.md
+services/papdaew-customers/
 ├── src/
 │   ├── controllers/
+│   │   └── customer.controller.js
 │   ├── middleware/
+│   │   └── auth.middleware.js
 │   ├── models/
+│   │   └── customer.model.js
 │   ├── routes/
+│   │   └── customer.route.js
 │   ├── services/
+│   │   ├── customer.service.js
+│   │   └── message.consumer.js
 │   ├── utils/
+│   │   └── validators.js
 │   ├── configs/
+│   │   ├── config.js
+│   │   ├── database.config.js
+│   │   └── messageBroker.config.js
 │   ├── server.js
 │   └── app.js
 ├── tests/
+│   ├── unit/
+│   └── integration/
 ├── .editorconfig
 ├── .env.example
 ├── .gitignore
@@ -72,23 +86,7 @@ services/papdaew-users/
    cp .env.example .env
    ```
 
-3. Configure environment variables:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Database Setup:
-
-   ```bash
-   # Start PostgreSQL (if using Docker)
-   docker-compose up -d postgres
-
-   # Run database migrations
-   npx prisma migrate dev
-   ```
-
-5. Run the service:
+3. Run the service:
 
    ```bash
    # Development
