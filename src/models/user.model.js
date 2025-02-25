@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
     username: {
       type: String,
       required: true,
@@ -14,21 +18,16 @@ const userSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
-    role: {
-      type: String,
-      enum: ['customer', 'vendor', 'admin'],
-      default: 'customer',
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ['active', 'inactive', 'suspended'],
-      default: 'active',
-    },
     firstName: String,
     lastName: String,
     phoneNumber: String,
     lastLoginAt: Date,
+    role: {
+      type: String,
+      enum: ['CUSTOMER', 'VENDOR', 'ADMIN'],
+      default: 'CUSTOMER',
+      required: true,
+    },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       sparse: true,
