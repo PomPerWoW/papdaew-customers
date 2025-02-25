@@ -1,6 +1,6 @@
-# services/papdaew-customers/.husky/commit-msg
+# services/papdaew-users/.husky/commit-msg
 
-echo "🔍 (Customers) Checking commit message format..."
+echo "🔍 (Users) Checking commit message format..."
 
 # Get the commit message
 commit_msg=$(cat "$1")

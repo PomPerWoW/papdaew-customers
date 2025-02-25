@@ -1,8 +1,8 @@
 {
-  "name": "papdaew-customers-service",
+  "name": "papdaew-users-service",
   "version": "1.0.0",
   "type": "commonjs",
-  "description": "Customers service",
+  "description": "Users service",
   "main": "src/app.js",
   "scripts": {
     "start": "NODE_ENV=production pm2 start src/app.js -i 5 --attach --watch",
@@ -20,15 +20,15 @@
   "author": "Papdaew",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PomPerWoW/papdaew-customers.git"
+    "url": "git+https://github.com/PomPerWoW/papdaew-users.git"
   },
   "bugs": {
-    "url": "https://github.com/PomPerWoW/papdaew-customers/issues"
+    "url": "https://github.com/PomPerWoW/papdaew-users/issues"
   },
   "imports": {
-    "#customers/*": "./src/*"
+    "#users/*": "./src/*"
   },
-  "homepage": "https://github.com/PomPerWoW/papdaew-customers#readme",
+  "homepage": "https://github.com/PomPerWoW/papdaew-users#readme",
   "dependencies": {
     "@papdaew/shared": "^0.2.5",
     "amqplib": "^0.10.5",

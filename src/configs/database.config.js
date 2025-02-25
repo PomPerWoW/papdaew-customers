@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { PinoLogger } = require('@papdaew/shared');
 
-const Config = require('#customers/configs/config.js');
+const Config = require('#users/configs/config.js');
 
 class Database {
   #logger;

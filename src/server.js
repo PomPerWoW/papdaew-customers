@@ -11,23 +11,23 @@ const {
   PinoLogger,
 } = require('@papdaew/shared');
 
-const CustomerRoutes = require('#customers/routes/customer.route.js');
-const Config = require('#customers/configs/config.js');
+const UserRoutes = require('#users/routes/model.route.js');
+const Config = require('#users/configs/config.js');
 
-class CustomerServer {
+class UserServer {
   #app;
   #server;
   #logger;
   #config;
-  #customerRoutes;
+  #userRoutes;
 
   constructor() {
     this.#app = express();
     this.#config = new Config();
     this.#logger = new PinoLogger().child({
-      service: 'Customer Server',
+      service: 'User Server',
     });
-    this.#customerRoutes = new CustomerRoutes();
+    this.#userRoutes = new UserRoutes();
   }
 
   setup = () => {
@@ -57,7 +57,7 @@ class CustomerServer {
   };
 
   #setupRoutes = app => {
-    app.use('/api/v1/customers', this.#customerRoutes.setup());
+    app.use('/api/v1/users', this.#userRoutes.setup());
   };
 
   #setupErrorHandlers = app => {
@@ -79,7 +79,7 @@ class CustomerServer {
       this.#server = http.createServer(app);
       this.#server.listen(this.#config.PORT, () => {
         this.#logger.info(
-          `Customer service is running on port ${this.#config.PORT}`
+          `User service is running on port ${this.#config.PORT}`
         );
       });
     } catch (error) {
@@ -100,4 +100,4 @@ class CustomerServer {
     });
 }
 
-module.exports = CustomerServer;
+module.exports = UserServer;
