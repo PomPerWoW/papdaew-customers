@@ -28,6 +28,22 @@ class UserController {
       data: user,
     });
   });
+
+  getCurrentUser = asyncHandler(async (req, res) => {
+    this.#logger.info('GET: /users/me');
+
+    this.#logger.info(
+      `Getting user profile for ID: ${req.user.id}, Role: ${req.user.role}`
+    );
+
+    const user = await this.#userService.getUserById(req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'User fetched successfully',
+      data: user,
+    });
+  });
 }
 
 module.exports = UserController;
