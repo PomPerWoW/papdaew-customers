@@ -1,6 +1,7 @@
 const { PinoLogger } = require('@papdaew/shared');
 
 const UserServer = require('#users/server.js');
+const EventSubscriber = require('#users/events/subscribers/event.subscriber.js');
 const MessageBroker = require('#users/configs/messageBroker.config.js');
 const Database = require('#users/configs/database.config.js');
 const Config = require('#users/configs/config.js');
@@ -17,13 +18,15 @@ class Application {
     this.server = new UserServer();
     this.database = new Database();
     this.messageBroker = new MessageBroker();
+    this.eventSubscriber = new EventSubscriber();
   }
 
-  initialize = () => {
+  initialize = async () => {
     this.appLogger.info('Initializing User Application');
     this.setupUncaughtException();
-    this.database.connect();
-    this.messageBroker.connect();
+    await this.database.connect();
+    await this.messageBroker.connect();
+    await this.eventSubscriber.setupSubscriptions();
     this.server.start();
     this.setupUnhandledRejection();
     this.setupShutdown();

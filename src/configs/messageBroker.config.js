@@ -1,7 +1,9 @@
 const amqp = require('amqplib');
-const { PinoLogger } = require('@papdaew/shared');
+const addFormats = require('ajv-formats');
+const Ajv = require('ajv');
+const { PinoLogger, InternalServerError } = require('@papdaew/shared');
 
-const UserService = require('#users/services/user.service.js');
+const userEventSchemas = require('#users/events/schemas/user.events.js');
 const Config = require('#users/configs/config.js');
 
 class MessageBroker {
@@ -9,7 +11,7 @@ class MessageBroker {
   #config;
   #connection;
   #channel;
-  #userService;
+  #validator;
   static #instance;
 
   constructor() {
@@ -17,19 +19,45 @@ class MessageBroker {
       return MessageBroker.#instance;
     }
     this.#config = new Config();
-    this.#userService = new UserService();
     this.#logger = new PinoLogger().child({
       service: 'Message Broker',
     });
+
+    // Initialize JSON schema validator
+    this.#validator = new Ajv();
+    addFormats(this.#validator);
+
+    // Register event schemas
+    this.#registerEventSchemas();
+
     MessageBroker.#instance = this;
   }
+
+  #registerEventSchemas() {
+    Object.entries(userEventSchemas).forEach(([eventName, schema]) => {
+      this.#validator.addSchema(schema, eventName);
+    });
+  }
+
+  #validateEventPayload = (eventType, payload) => {
+    const isValid = this.#validator.validate(eventType, payload);
+
+    if (!isValid) {
+      const { errors } = this.#validator;
+      this.#logger.error(`Invalid event payload for ${eventType}`, {
+        errors,
+      });
+      throw new InternalServerError(
+        `Invalid event payload for ${eventType}: ${JSON.stringify(errors)}`
+      );
+    }
+  };
 
   connect = async () => {
     try {
       this.#connection = await amqp.connect(this.#config.RABBITMQ_URL);
       this.#channel = await this.#connection.createChannel();
       this.#logger.info('Successfully connected to RabbitMQ');
-      await this.setupUserCreationConsumer();
     } catch (error) {
       this.#logger.error('Failed to connect to RabbitMQ', error);
       throw error;
@@ -41,77 +69,117 @@ class MessageBroker {
     await this.#connection?.close();
   };
 
-  publishDirect = async (queue, message, logMessage) => {
+  publishDirect = async (queue, eventType, payload, logMessage) => {
     try {
+      this.#validateEventPayload(eventType, payload);
+
+      const event = {
+        type: eventType,
+        data: payload,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          service: 'user-service',
+        },
+      };
+
+      const content = JSON.stringify(event);
+
       await this.#channel.assertQueue(queue, { durable: true });
-      await this.#channel.sendToQueue(queue, Buffer.from(message), {
+      await this.#channel.sendToQueue(queue, Buffer.from(content), {
         persistent: true,
       });
 
-      this.#logger.info(logMessage);
+      this.#logger.info(logMessage || `Published message to queue ${queue}`);
+      return true;
     } catch (error) {
-      this.#logger.error(
-        `Failed to publish direct message to queue: ${queue}`,
-        error
-      );
+      this.#logger.error(`Failed to publish message to queue ${queue}`, error);
       throw error;
     }
   };
 
-  publishFanout = async (exchange, message, logMessage) => {
+  publishFanout = async (exchange, eventType, payload, logMessage) => {
     try {
+      this.#validateEventPayload(eventType, payload);
+
+      const event = {
+        type: eventType,
+        data: payload,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          service: 'user-service',
+        },
+      };
+
+      const content = JSON.stringify(event);
+
       await this.#channel.assertExchange(exchange, 'fanout', { durable: true });
+      await this.#channel.publish(exchange, '', Buffer.from(content));
 
-      await this.#channel.publish(
-        exchange,
-        '',
-        Buffer.from(JSON.stringify(message))
+      this.#logger.info(
+        logMessage || `Published event ${eventType} to ${exchange}`
       );
-
-      this.#logger.info(logMessage);
+      return true;
     } catch (error) {
-      this.#logger.error(
-        `Failed to publish fanout message to exchange: ${exchange}`,
-        error
-      );
+      this.#logger.error(`Failed to publish event to ${exchange}`, error);
       throw error;
     }
   };
 
-  setupUserCreationConsumer = async () => {
-    const queue = 'user_creation';
-
+  subscribeDirect = async (queue, handler) => {
     try {
       await this.#channel.assertQueue(queue, { durable: true });
-      this.#logger.info(`Starting to consume messages from queue: ${queue}`);
 
       await this.#channel.consume(queue, async message => {
-        if (!message) {
-          return;
-        }
-
         try {
-          const content = JSON.parse(message.content.toString());
+          const content = message.content.toString();
 
-          if (content.type === 'USER_CREATED') {
-            const userData = content.data;
+          const parsedContent = JSON.parse(content);
 
-            await this.#userService.createUser(userData);
-
-            this.#logger.info(
-              `Successfully created user with ID: ${userData.id}`
-            );
-          }
-
+          await handler(parsedContent);
           this.#channel.ack(message);
         } catch (error) {
-          this.#logger.error('Error processing message', error);
-          // Reject the message and requeue
-          this.#channel.nack(message, false, true);
+          this.#logger.error(
+            `Error processing message from queue ${queue}`,
+            error
+          );
+          // Reject the message without requeuing for now
+          this.#channel.nack(message, false, false);
         }
       });
+
+      this.#logger.info(`Subscribed to direct queue ${queue}`);
     } catch (error) {
-      this.#logger.error('Failed to setup user creation consumer', error);
+      this.#logger.error(`Failed to subscribe to queue ${queue}`, error);
+      throw error;
+    }
+  };
+
+  subscribeFanout = async (exchange, queue, handler) => {
+    try {
+      await this.#channel.assertExchange(exchange, 'fanout', { durable: true });
+      const queueResult = await this.#channel.assertQueue(queue, {
+        durable: true,
+      });
+      await this.#channel.bindQueue(queueResult.queue, exchange, '');
+
+      await this.#channel.consume(queueResult.queue, async message => {
+        try {
+          const event = JSON.parse(message.content.toString());
+          await handler(event);
+          this.#channel.ack(message);
+        } catch (error) {
+          this.#logger.error(
+            `Error processing message from ${exchange}`,
+            error
+          );
+          // Reject the message without requeuing for now
+          this.#channel.nack(message, false, false);
+        }
+      });
+
+      this.#logger.info(`Subscribed to ${exchange} events on queue ${queue}`);
+    } catch (error) {
+      this.#logger.error(`Failed to subscribe to ${exchange}`, error);
       throw error;
     }
   };
