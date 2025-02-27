@@ -19,16 +19,14 @@ class UserCommandService {
         username: userData.username,
         email: userData.email,
         role: userData.role,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        phoneNumber: userData.phoneNumber,
+        version: userData.version,
       });
 
       const savedUser = await user.save();
 
       return savedUser;
     } catch (error) {
-      this.#logger.error('Failed to create user', error);
+      this.#logger.error(error, 'Failed to create user');
       throw error;
     }
   };
@@ -48,7 +46,7 @@ class UserCommandService {
 
       return updatedUser;
     } catch (error) {
-      this.#logger.error(`Failed to update user ${id}`, error);
+      this.#logger.error(error, `Failed to update user ${id}`);
       throw error;
     }
   };
@@ -65,7 +63,7 @@ class UserCommandService {
 
       return { success: true, message: 'User deleted successfully' };
     } catch (error) {
-      this.#logger.error(`Failed to delete user ${id}`, error);
+      this.#logger.error(error, `Failed to delete user ${id}`);
       throw error;
     }
   };

@@ -33,9 +33,15 @@ const userSchema = new mongoose.Schema(
       default: 'CUSTOMER',
       required: true,
     },
+    version: {
+      type: Number,
+      default: 1,
+      required: true,
+    },
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 

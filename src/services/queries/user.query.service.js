@@ -22,7 +22,7 @@ class UserQueryService {
 
       return user;
     } catch (error) {
-      this.#logger.error(`Failed to get user ${id}`, error);
+      this.#logger.error(error, `Failed to get user ${id}`);
       throw error;
     }
   };
@@ -37,7 +37,7 @@ class UserQueryService {
 
       return user;
     } catch (error) {
-      this.#logger.error(`Failed to get user by email ${email}`, error);
+      this.#logger.error(error, `Failed to get user by email ${email}`);
       throw error;
     }
   };
@@ -52,7 +52,7 @@ class UserQueryService {
 
       return user;
     } catch (error) {
-      this.#logger.error(`Failed to get user by username ${username}`, error);
+      this.#logger.error(error, `Failed to get user by username ${username}`);
       throw error;
     }
   };

@@ -19,10 +19,18 @@ class Database {
 
   connect = async () => {
     try {
-      await mongoose.connect(this.#config.MONGODB_URI);
+      const connectionOptions = {
+        serverSelectionTimeoutMS:
+          this.#config.NODE_ENV === 'development' ? 2000 : 30000,
+        connectTimeoutMS:
+          this.#config.NODE_ENV === 'development' ? 2000 : 10000,
+        socketTimeoutMS: this.#config.NODE_ENV === 'development' ? 3000 : 45000,
+      };
+
+      await mongoose.connect(this.#config.MONGODB_URI, connectionOptions);
       this.#logger.info('Successfully connected to MongoDB');
     } catch (error) {
-      this.#logger.error('Failed to connect to MongoDB', error);
+      this.#logger.error(error, 'Failed to connect to MongoDB');
       throw error;
     }
   };
