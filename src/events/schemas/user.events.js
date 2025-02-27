@@ -9,8 +9,6 @@ const USER_CREATED = {
     firstName: { type: 'string' },
     lastName: { type: 'string' },
     phoneNumber: { type: 'string' },
-    timestamp: { type: 'string', format: 'date-time' },
-    version: { type: 'integer', minimum: 1 },
   },
 };
 

@@ -19,7 +19,6 @@ class UserCommandService {
         username: userData.username,
         email: userData.email,
         role: userData.role,
-        version: userData.version,
       });
 
       const savedUser = await user.save();

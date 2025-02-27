@@ -17,6 +17,7 @@ class UserQueryService {
       const user = await User.findById(id);
 
       if (!user) {
+        this.#logger.error(`User not found for id: ${id}`);
         throw new NotFoundError('User not found');
       }
 
@@ -28,33 +29,25 @@ class UserQueryService {
   };
 
   getUserByEmail = async email => {
-    try {
-      const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      this.#logger.error(error, `Failed to get user by email ${email}`);
-      throw error;
+    if (!user) {
+      this.#logger.error(`User not found for email: ${email}`);
+      throw new NotFoundError('User not found');
     }
+
+    return user;
   };
 
   getUserByUsername = async username => {
-    try {
-      const user = await User.findOne({ username });
+    const user = await User.findOne({ username });
 
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      this.#logger.error(error, `Failed to get user by username ${username}`);
-      throw error;
+    if (!user) {
+      this.#logger.error(`User not found for username: ${username}`);
+      throw new NotFoundError('User not found');
     }
+
+    return user;
   };
 }
 

@@ -11,7 +11,8 @@ const {
   PinoLogger,
 } = require('@papdaew/shared');
 
-const UserRoutes = require('#users/routes/model.route.js');
+const UserRoutes = require('#users/routes/user.route.js');
+const CustomerRoutes = require('#users/routes/customer.route.js');
 const Config = require('#users/configs/config.js');
 
 class UserServer {
@@ -20,14 +21,16 @@ class UserServer {
   #logger;
   #config;
   #userRoutes;
+  #customerRoutes;
 
   constructor() {
     this.#app = express();
     this.#config = new Config();
+    this.#userRoutes = new UserRoutes();
+    this.#customerRoutes = new CustomerRoutes();
     this.#logger = new PinoLogger().child({
       service: 'User Server',
     });
-    this.#userRoutes = new UserRoutes();
   }
 
   setup = () => {
@@ -58,6 +61,7 @@ class UserServer {
 
   #setupRoutes = app => {
     app.use('/api/v1/users', this.#userRoutes.setup());
+    app.use('/api/v1/customers', this.#customerRoutes.setup());
   };
 
   #setupErrorHandlers = app => {
@@ -75,17 +79,11 @@ class UserServer {
   };
 
   #startServer = app => {
-    try {
-      this.#server = http.createServer(app);
-      this.#server.listen(this.#config.PORT, () => {
-        this.#logger.info(
-          `User service is running on port ${this.#config.PORT}`
-        );
-      });
-    } catch (error) {
-      this.#logger.error(error, 'Failed to start server');
-      process.exit(1);
-    }
+    this.#server = http.createServer(app);
+
+    this.#server.listen(this.#config.PORT, () => {
+      this.#logger.info(`User service is running on port ${this.#config.PORT}`);
+    });
   };
 
   close = () =>
