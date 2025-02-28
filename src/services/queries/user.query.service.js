@@ -17,13 +17,18 @@ class UserQueryService {
       const user = await User.findById(id);
 
       if (!user) {
-        this.#logger.error(`User not found for id: ${id}`);
         throw new NotFoundError('User not found');
+      }
+
+      if (user.role === 'CUSTOMER') {
+        await user.populate('customer');
+      } else if (user.role === 'VENDOR') {
+        await user.populate('vendor');
       }
 
       return user;
     } catch (error) {
-      this.#logger.error(error, `Failed to get user ${id}`);
+      this.#logger.error(error, `Failed to get user by id: '${id}'`);
       throw error;
     }
   };

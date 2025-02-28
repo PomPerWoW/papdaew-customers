@@ -21,6 +21,7 @@ class UserRoutes {
         this.#userMiddleware.internalAuthMiddleware,
         this.#userController.getCurrentUser
       );
+    this.#router.route('/').post(this.#userController.createUser);
     this.#router.route('/:id').get(this.#userController.getUser);
     return this.#router;
   }

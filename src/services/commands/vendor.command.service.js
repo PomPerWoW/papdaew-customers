@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const { PinoLogger } = require('@papdaew/shared');
 
-const Vendor = require('#users/models/vendor.model');
-const User = require('#users/models/user.model');
+const Vendor = require('#users/models/vendor.model.js');
 
 class VendorCommandService {
   #logger;
@@ -13,21 +12,14 @@ class VendorCommandService {
     });
   }
 
-  async createVendor(userData, vendorData) {
+  async createVendor(userId, vendorData = {}) {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-      // Create user first
-      const user = new User({
-        ...userData,
-        role: 'VENDOR',
-      });
-      await user.save({ session });
-
       // Create vendor with reference to user
       const vendor = new Vendor({
-        userId: user._id,
+        userId,
         ...vendorData,
       });
       await vendor.save({ session });
@@ -35,10 +27,7 @@ class VendorCommandService {
       await session.commitTransaction();
       session.endSession();
 
-      return {
-        ...vendor.toObject(),
-        user: user.toObject(),
-      };
+      return vendor.toJSON();
     } catch (error) {
       await session.abortTransaction();
       session.endSession();

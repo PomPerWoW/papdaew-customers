@@ -20,21 +20,6 @@ const userSchema = new mongoose.Schema(
       enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING_VERIFICATION'],
       default: 'ACTIVE',
     },
-    preferences: {
-      language: { type: String, default: 'en' },
-      notifications: {
-        email: { type: Boolean, default: true },
-        push: { type: Boolean, default: true },
-      },
-      theme: { type: String, default: 'light' },
-      timezone: { type: String, default: 'UTC' },
-    },
-    metadata: {
-      registrationSource: String,
-      registrationDate: { type: Date, default: Date.now },
-      verifiedEmail: { type: Boolean, default: false },
-      verifiedPhone: { type: Boolean, default: false },
-    },
   },
   {
     timestamps: true,
@@ -47,9 +32,7 @@ const userSchema = new mongoose.Schema(
         return ret;
       },
     },
-    toObject: {
-      virtuals: true,
-    },
+    toObject: { virtuals: true },
   }
 );
 
@@ -61,15 +44,17 @@ userSchema.virtual('fullName').get(function () {
   return this.username;
 });
 
+// Add virtual for customer data
+userSchema.virtual('customer', {
+  ref: 'Customer',
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: true,
+});
+
 // Method to check if user has a specific role
 userSchema.methods.hasRole = function (role) {
   return this.role === role;
-};
-
-// Method to update user preferences
-userSchema.methods.updatePreferences = function (preferences) {
-  Object.assign(this.preferences, preferences);
-  return this.save();
 };
 
 const User = mongoose.model('User', userSchema);

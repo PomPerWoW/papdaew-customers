@@ -20,7 +20,7 @@ class EventSubscriber {
     try {
       await this.#messageBroker.subscribeDirect(
         'user_creation',
-        this.#userEventHandler.handleUserCreatedFromAuth
+        this.#userEventHandler.handleUserCreated
       );
 
       this.#logger.info('Event subscriptions set up successfully');

@@ -1,6 +1,5 @@
 const { PinoLogger } = require('@papdaew/shared');
 
-const User = require('#users/models/user.model.js');
 const Customer = require('#users/models/customer.model.js');
 
 class CustomerCommandService {
@@ -12,26 +11,16 @@ class CustomerCommandService {
     });
   }
 
-  async createCustomer(userData, customerData = {}) {
+  async createCustomer(userId, customerData = {}) {
     try {
-      // Create user first
-      const user = new User({
-        ...userData,
-        role: 'CUSTOMER',
-      });
-      await user.save();
-
       // Create customer with reference to user
       const customer = new Customer({
-        userId: user._id,
+        userId,
         ...customerData,
       });
       await customer.save();
 
-      return {
-        ...customer.toObject(),
-        user: user.toObject(),
-      };
+      return customer;
     } catch (error) {
       this.#logger.error(error, 'Failed to create customer');
       throw error;

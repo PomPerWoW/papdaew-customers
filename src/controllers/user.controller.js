@@ -19,6 +19,18 @@ class UserController {
     this.#logger = new PinoLogger().child({ service: 'User Controller' });
   }
 
+  createUser = asyncHandler(async (req, res) => {
+    this.#logger.info('POST: create user');
+
+    const user = await this.#userCommandService.createUser(req.body);
+
+    res.status(StatusCodes.CREATED).json({
+      status: 'success',
+      message: 'User created successfully',
+      data: user,
+    });
+  });
+
   getUser = asyncHandler(async (req, res) => {
     this.#logger.info('GET: user by id');
 
