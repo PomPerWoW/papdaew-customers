@@ -1,20 +1,17 @@
 const USER_CREATED = {
   type: 'object',
-  required: ['id', 'email', 'username', 'role', 'timestamp', 'version'],
+  required: ['id', 'email', 'username', 'role'],
   properties: {
     id: { type: 'string' },
     email: { type: 'string', format: 'email' },
     username: { type: 'string' },
     role: { type: 'string', enum: ['CUSTOMER', 'VENDOR', 'ADMIN'] },
-    firstName: { type: 'string' },
-    lastName: { type: 'string' },
-    phoneNumber: { type: 'string' },
   },
 };
 
 const USER_UPDATED = {
   type: 'object',
-  required: ['id', 'changes', 'timestamp', 'version'],
+  required: ['id', 'changes'],
   properties: {
     id: { type: 'string' },
     changes: {
@@ -28,18 +25,14 @@ const USER_UPDATED = {
         role: { type: 'string', enum: ['CUSTOMER', 'VENDOR', 'ADMIN'] },
       },
     },
-    timestamp: { type: 'string', format: 'date-time' },
-    version: { type: 'integer', minimum: 1 },
   },
 };
 
 const USER_DELETED = {
   type: 'object',
-  required: ['id', 'timestamp', 'version'],
+  required: ['id'],
   properties: {
     id: { type: 'string' },
-    timestamp: { type: 'string', format: 'date-time' },
-    version: { type: 'integer', minimum: 1 },
   },
 };
 
