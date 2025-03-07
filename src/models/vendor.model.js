@@ -117,6 +117,7 @@ const vendorSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    versionKey: 'version',
     toJSON: {
       virtuals: true,
       transform: (doc, ret) => {

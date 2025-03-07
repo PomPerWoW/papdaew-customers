@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const { PinoLogger } = require('@papdaew/shared');
 
 const Vendor = require('#users/models/vendor.model.js');
@@ -13,24 +12,16 @@ class VendorCommandService {
   }
 
   async createVendor(userId, vendorData = {}) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
       // Create vendor with reference to user
       const vendor = new Vendor({
         userId,
         ...vendorData,
       });
-      await vendor.save({ session });
+      await vendor.save();
 
-      await session.commitTransaction();
-      session.endSession();
-
-      return vendor.toJSON();
+      return vendor;
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
       this.#logger.error(error, 'Failed to create vendor');
       throw error;
     }
@@ -67,6 +58,7 @@ class VendorCommandService {
   async addQueue(vendorId, queueData) {
     try {
       const vendor = await Vendor.findById(vendorId);
+
       if (!vendor) {
         this.#logger.error(`Vendor not found for id: ${vendorId}`);
         throw new Error('Vendor not found');

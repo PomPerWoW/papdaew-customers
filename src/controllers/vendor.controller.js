@@ -22,10 +22,10 @@ class VendorController {
   createVendor = asyncHandler(async (req, res) => {
     this.#logger.info('POST: create vendor');
 
-    const { userData, vendorData } = req.body;
+    const { userId, vendorData } = req.body;
 
-    if (!userData || !userData.email || !userData.username) {
-      throw new BadRequestError('Required user data is missing');
+    if (!userId) {
+      throw new BadRequestError('User ID is required');
     }
 
     if (!vendorData || !vendorData.businessName || !vendorData.businessType) {
@@ -33,7 +33,7 @@ class VendorController {
     }
 
     const vendor = await this.#vendorCommandService.createVendor(
-      userData,
+      userId,
       vendorData
     );
 

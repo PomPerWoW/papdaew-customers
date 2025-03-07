@@ -97,69 +97,6 @@ class CustomerCommandService {
       throw error;
     }
   }
-
-  async addFavoriteVendor(customerId, vendorData) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.addFavoriteVendor(vendorData);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to add favorite vendor');
-      throw error;
-    }
-  }
-
-  async removeFavoriteVendor(customerId, vendorId) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        throw new Error('Customer not found');
-      }
-
-      await customer.removeFavoriteVendor(vendorId);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to remove favorite vendor');
-      throw error;
-    }
-  }
-
-  async addReservation(customerId, reservationData) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.addReservation(reservationData);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to add reservation');
-      throw error;
-    }
-  }
-
-  async cancelReservation(customerId, reservationId) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.cancelReservation(reservationId);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to cancel reservation');
-      throw error;
-    }
-  }
 }
 
 module.exports = CustomerCommandService;

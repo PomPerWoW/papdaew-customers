@@ -30,7 +30,7 @@ class CustomerController {
 
     const customer = await this.#customerCommandService.createCustomer(
       userId,
-      customerData || {}
+      customerData
     );
 
     res.status(StatusCodes.CREATED).json({
