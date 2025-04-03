@@ -22,15 +22,15 @@ class CustomerController {
   createCustomer = asyncHandler(async (req, res) => {
     this.#logger.info('POST: create customer');
 
-    const { userData, customerData } = req.body;
+    const { userId, customerData } = req.body;
 
-    if (!userData || !userData.email || !userData.username) {
-      throw new BadRequestError('Required user data is missing');
+    if (!userId) {
+      throw new BadRequestError('User ID is required');
     }
 
     const customer = await this.#customerCommandService.createCustomer(
-      userData,
-      customerData || {}
+      userId,
+      customerData
     );
 
     res.status(StatusCodes.CREATED).json({

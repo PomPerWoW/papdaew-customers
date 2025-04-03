@@ -1,8 +1,6 @@
-const mongoose = require('mongoose');
 const { PinoLogger } = require('@papdaew/shared');
 
-const Vendor = require('#users/models/vendor.model');
-const User = require('#users/models/user.model');
+const Vendor = require('#users/models/vendor.model.js');
 
 class VendorCommandService {
   #logger;
@@ -13,35 +11,17 @@ class VendorCommandService {
     });
   }
 
-  async createVendor(userData, vendorData) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+  async createVendor(userId, vendorData = {}) {
     try {
-      // Create user first
-      const user = new User({
-        ...userData,
-        role: 'VENDOR',
-      });
-      await user.save({ session });
-
       // Create vendor with reference to user
       const vendor = new Vendor({
-        userId: user._id,
+        userId,
         ...vendorData,
       });
-      await vendor.save({ session });
+      await vendor.save();
 
-      await session.commitTransaction();
-      session.endSession();
-
-      return {
-        ...vendor.toObject(),
-        user: user.toObject(),
-      };
+      return vendor;
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
       this.#logger.error(error, 'Failed to create vendor');
       throw error;
     }
@@ -78,6 +58,7 @@ class VendorCommandService {
   async addQueue(vendorId, queueData) {
     try {
       const vendor = await Vendor.findById(vendorId);
+
       if (!vendor) {
         this.#logger.error(`Vendor not found for id: ${vendorId}`);
         throw new Error('Vendor not found');

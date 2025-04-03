@@ -1,6 +1,5 @@
 const { PinoLogger } = require('@papdaew/shared');
 
-const User = require('#users/models/user.model.js');
 const Customer = require('#users/models/customer.model.js');
 
 class CustomerCommandService {
@@ -12,26 +11,16 @@ class CustomerCommandService {
     });
   }
 
-  async createCustomer(userData, customerData = {}) {
+  async createCustomer(userId, customerData = {}) {
     try {
-      // Create user first
-      const user = new User({
-        ...userData,
-        role: 'CUSTOMER',
-      });
-      await user.save();
-
       // Create customer with reference to user
       const customer = new Customer({
-        userId: user._id,
+        userId,
         ...customerData,
       });
       await customer.save();
 
-      return {
-        ...customer.toObject(),
-        user: user.toObject(),
-      };
+      return customer;
     } catch (error) {
       this.#logger.error(error, 'Failed to create customer');
       throw error;
@@ -105,69 +94,6 @@ class CustomerCommandService {
       return customer;
     } catch (error) {
       this.#logger.error(error, 'Failed to update active queue');
-      throw error;
-    }
-  }
-
-  async addFavoriteVendor(customerId, vendorData) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.addFavoriteVendor(vendorData);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to add favorite vendor');
-      throw error;
-    }
-  }
-
-  async removeFavoriteVendor(customerId, vendorId) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        throw new Error('Customer not found');
-      }
-
-      await customer.removeFavoriteVendor(vendorId);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to remove favorite vendor');
-      throw error;
-    }
-  }
-
-  async addReservation(customerId, reservationData) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.addReservation(reservationData);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to add reservation');
-      throw error;
-    }
-  }
-
-  async cancelReservation(customerId, reservationId) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (!customer) {
-        this.#logger.error(`Customer not found for id: ${customerId}`);
-        throw new Error('Customer not found');
-      }
-
-      await customer.cancelReservation(reservationId);
-      return customer;
-    } catch (error) {
-      this.#logger.error(error, 'Failed to cancel reservation');
       throw error;
     }
   }

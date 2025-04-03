@@ -1,4 +1,4 @@
-const { PinoLogger } = require('@papdaew/shared');
+const { PinoLogger, NotFoundError } = require('@papdaew/shared');
 
 const Customer = require('#users/models/customer.model.js');
 
@@ -15,13 +15,13 @@ class CustomerQueryService {
     const query = Customer.findById(customerId);
 
     if (includeUser) {
-      query.populate('user');
+      await query.populate('user');
     }
 
-    const customer = await query.exec();
+    const customer = await query;
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     return customer;
@@ -34,10 +34,10 @@ class CustomerQueryService {
       query.populate('user');
     }
 
-    const customer = await query.exec();
+    const customer = await query;
     if (!customer) {
       this.#logger.error(`Customer not found for userId: ${userId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     return customer;
@@ -55,7 +55,7 @@ class CustomerQueryService {
     const customer = await Customer.findById(customerId);
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     let { queueHistory } = customer;
@@ -80,7 +80,7 @@ class CustomerQueryService {
     const customer = await Customer.findById(customerId);
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     return customer.activeQueues;
@@ -90,7 +90,7 @@ class CustomerQueryService {
     const customer = await Customer.findById(customerId);
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     return customer.favoriteVendors;
@@ -100,7 +100,7 @@ class CustomerQueryService {
     const customer = await Customer.findById(customerId);
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     let reservations = customer.upcomingReservations;
@@ -123,7 +123,7 @@ class CustomerQueryService {
     const customer = await Customer.findById(customerId);
     if (!customer) {
       this.#logger.error(`Customer not found for id: ${customerId}`);
-      throw new Error('Customer not found');
+      throw new NotFoundError('Customer not found');
     }
 
     return customer.statistics;

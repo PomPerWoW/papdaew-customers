@@ -1,4 +1,4 @@
-const { NotFoundError } = require('@papdaew/shared');
+const { NotFoundError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
 
 const User = require('#users/models/user.model.js');
@@ -14,6 +14,14 @@ class UserCommandService {
 
   createUser = async userData => {
     try {
+      const existingUser = await User.findOne({
+        $or: [{ username: userData.username }, { email: userData.email }],
+      });
+
+      if (existingUser) {
+        throw new BadRequestError('User already exists');
+      }
+
       const user = new User({
         _id: userData.id,
         username: userData.username,

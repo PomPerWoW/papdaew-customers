@@ -65,32 +65,6 @@ const customerSchema = new mongoose.Schema(
         },
       },
     ],
-    favoriteVendors: [
-      {
-        vendorId: { type: String, required: true },
-        vendorName: String,
-        addedAt: { type: Date, default: Date.now },
-        frequencyVisited: { type: Number, default: 0 },
-        lastVisited: Date,
-      },
-    ],
-    upcomingReservations: [
-      {
-        reservationId: { type: String, required: true },
-        vendorId: { type: String, required: true },
-        vendorName: String,
-        serviceType: String,
-        reservationTime: { type: Date, required: true },
-        status: {
-          type: String,
-          enum: ['CONFIRMED', 'PENDING', 'CANCELLED'],
-          default: 'CONFIRMED',
-        },
-        partySize: Number,
-        notes: String,
-        reminderSent: { type: Boolean, default: false },
-      },
-    ],
     statistics: {
       totalQueuesJoined: { type: Number, default: 0 },
       totalWaitTime: { type: Number, default: 0 },
@@ -100,13 +74,12 @@ const customerSchema = new mongoose.Schema(
       noShowCount: { type: Number, default: 0 },
       fastTrackUsed: { type: Number, default: 0 },
       reservationsUsed: { type: Number, default: 0 },
-      mostVisitedVendorId: String,
-      mostVisitedVendorCount: { type: Number, default: 0 },
       averageRating: { type: Number, default: 0 },
     },
   },
   {
     timestamps: true,
+    versionKey: 'version',
     toJSON: {
       virtuals: true,
       transform: (doc, ret) => {
@@ -146,9 +119,6 @@ customerSchema.methods.addQueueToHistory = function (queueData) {
       this.statistics.averageWaitTime =
         this.statistics.totalWaitTime / this.statistics.completedQueues;
     }
-
-    // Update favorite vendor statistics
-    this._updateFavoriteVendorStats(queueData.vendorId, queueData.vendorName);
 
     // Update rating statistics if provided
     if (queueData.rating) {
@@ -206,85 +176,6 @@ customerSchema.methods.updateActiveQueue = function (queueId, updateData) {
   }
 
   return Promise.reject(new Error('Active queue not found'));
-};
-
-// Method to add a favorite vendor
-customerSchema.methods.addFavoriteVendor = function (vendorData) {
-  // Check if vendor already exists in favorites
-  const existingIndex = this.favoriteVendors.findIndex(
-    v => v.vendorId === vendorData.vendorId
-  );
-
-  if (existingIndex === -1) {
-    this.favoriteVendors.push(vendorData);
-  }
-
-  return this.save();
-};
-
-// Method to remove a favorite vendor
-customerSchema.methods.removeFavoriteVendor = function (vendorId) {
-  this.favoriteVendors = this.favoriteVendors.filter(
-    v => v.vendorId !== vendorId
-  );
-
-  return this.save();
-};
-
-// Method to add an upcoming reservation
-customerSchema.methods.addReservation = function (reservationData) {
-  this.upcomingReservations.push(reservationData);
-  return this.save();
-};
-
-// Method to cancel a reservation
-customerSchema.methods.cancelReservation = function (reservationId) {
-  const reservationIndex = this.upcomingReservations.findIndex(
-    r => r.reservationId === reservationId
-  );
-
-  if (reservationIndex !== -1) {
-    this.upcomingReservations[reservationIndex].status = 'CANCELLED';
-    return this.save();
-  }
-
-  return Promise.reject(new Error('Reservation not found'));
-};
-
-// Private method to update favorite vendor statistics
-customerSchema.methods._updateFavoriteVendorStats = function (
-  vendorId,
-  vendorName
-) {
-  // Find the vendor in favorites
-  const vendorIndex = this.favoriteVendors.findIndex(
-    v => v.vendorId === vendorId
-  );
-
-  if (vendorIndex !== -1) {
-    // Update existing vendor
-    this.favoriteVendors[vendorIndex].frequencyVisited += 1;
-    this.favoriteVendors[vendorIndex].lastVisited = new Date();
-  } else {
-    // Add new vendor to favorites if they've visited
-    this.favoriteVendors.push({
-      vendorId,
-      vendorName,
-      frequencyVisited: 1,
-      lastVisited: new Date(),
-    });
-  }
-
-  // Update most visited vendor statistics
-  if (
-    !this.statistics.mostVisitedVendorId ||
-    this.favoriteVendors[vendorIndex]?.frequencyVisited >
-      this.statistics.mostVisitedVendorCount
-  ) {
-    this.statistics.mostVisitedVendorId = vendorId;
-    this.statistics.mostVisitedVendorCount =
-      this.favoriteVendors[vendorIndex]?.frequencyVisited || 1;
-  }
 };
 
 const Customer = mongoose.model('Customer', customerSchema);
