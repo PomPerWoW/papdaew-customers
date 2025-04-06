@@ -12,6 +12,28 @@ class UserQueryService {
     });
   }
 
+  async getUsers(options = {}) {
+    try {
+      const { limit = 10, offset = 0 } = options;
+
+      const query = {};
+
+      const users = await User.find(query)
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit);
+
+      const total = await User.countDocuments(query);
+
+      this.#logger.info({ count: users.length, total }, 'Retrieved users');
+
+      return { users, total };
+    } catch (error) {
+      this.#logger.error(error, 'Failed to get users');
+      throw error;
+    }
+  }
+
   getUserById = async id => {
     try {
       const user = await User.findById(id);

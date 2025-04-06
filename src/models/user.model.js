@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     phoneNumber: String,
     role: {
       type: String,
-      enum: ['CUSTOMER', 'VENDOR', 'ADMIN'],
+      enum: ['CUSTOMER', 'VENDOR', 'ADMIN', 'STAFF'],
       default: 'CUSTOMER',
       required: true,
     },
@@ -47,6 +47,14 @@ userSchema.virtual('fullName').get(function () {
 // Add virtual for customer data
 userSchema.virtual('customer', {
   ref: 'Customer',
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: true,
+});
+
+// Add virtual for staff data
+userSchema.virtual('staff', {
+  ref: 'Staff',
   localField: '_id',
   foreignField: 'userId',
   justOne: true,

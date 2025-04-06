@@ -22,6 +22,7 @@ class UserRoutes {
         this.#userController.getCurrentUser
       );
     this.#router.route('/').post(this.#userController.createUser);
+    this.#router.route('/').get(this.#userController.getUsers);
     this.#router.route('/:id').get(this.#userController.getUser);
     return this.#router;
   }

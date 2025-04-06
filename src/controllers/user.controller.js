@@ -31,6 +31,27 @@ class UserController {
     });
   });
 
+  getUsers = asyncHandler(async (req, res) => {
+    const { limit, offset } = req.query;
+
+    const options = {
+      limit: limit ? parseInt(limit, 10) : 10,
+      offset: offset ? parseInt(offset, 10) : 0,
+    };
+
+    const { users, total } = await this.#userQueryService.getUsers(options);
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      data: users,
+      meta: {
+        total,
+        limit: options.limit,
+        offset: options.offset,
+      },
+    });
+  });
+
   getUser = asyncHandler(async (req, res) => {
     this.#logger.info('GET: user by id');
 
