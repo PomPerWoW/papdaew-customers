@@ -1,16 +1,19 @@
 const { PinoLogger } = require('@papdaew/shared');
 
 const UserCommandService = require('#users/services/commands/user.command.service.js');
+const StaffCommandService = require('#users/services/commands/staff.command.service.js');
 const CustomerCommandService = require('#users/services/commands/customer.command.service.js');
 
 class UserEventHandler {
   #logger;
   #userCommandService;
   #customerCommandService;
+  #staffCommandService;
 
   constructor() {
     this.#userCommandService = new UserCommandService();
     this.#customerCommandService = new CustomerCommandService();
+    this.#staffCommandService = new StaffCommandService();
     this.#logger = new PinoLogger().child({
       service: 'User Event Handler',
     });
@@ -33,6 +36,14 @@ class UserEventHandler {
         case 'CUSTOMER':
           await this.#customerCommandService.createCustomer(user._id);
           break;
+        case 'STAFF': {
+          const staffData = {
+            userId: user._id,
+            userData,
+          };
+          await this.#staffCommandService.createStaff(staffData);
+          break;
+        }
         default:
           this.#logger.error({ event }, 'Invalid user role in event');
           break;

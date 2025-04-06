@@ -12,6 +12,7 @@ const {
 } = require('@papdaew/shared');
 
 const UserRoutes = require('#users/routes/user.route.js');
+const StaffRoutes = require('#users/routes/staff.route.js');
 const CustomerRoutes = require('#users/routes/customer.route.js');
 const Config = require('#users/configs/config.js');
 
@@ -22,12 +23,14 @@ class UserServer {
   #config;
   #userRoutes;
   #customerRoutes;
+  #staffRoutes;
 
   constructor() {
     this.#app = express();
     this.#config = new Config();
     this.#userRoutes = new UserRoutes();
     this.#customerRoutes = new CustomerRoutes();
+    this.#staffRoutes = new StaffRoutes();
     this.#logger = new PinoLogger().child({
       service: 'User Server',
     });
@@ -62,6 +65,7 @@ class UserServer {
   #setupRoutes = app => {
     app.use('/api/v1/users', this.#userRoutes.setup());
     app.use('/api/v1/customers', this.#customerRoutes.setup());
+    app.use('/api/v1/staff', this.#staffRoutes.setup());
   };
 
   #setupErrorHandlers = app => {
