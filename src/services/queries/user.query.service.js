@@ -44,8 +44,8 @@ class UserQueryService {
 
       if (user.role === 'CUSTOMER') {
         await user.populate('customer');
-      } else if (user.role === 'VENDOR') {
-        await user.populate('vendor');
+      } else if (user.role === 'STAFF') {
+        await user.populate('staff');
       }
 
       return user;
